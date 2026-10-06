@@ -1,0 +1,13 @@
+Privacy Policy
+
+We collect only the email address and name you give us when you create an account, so that we can run your account.
+
+We do not sell your personal information. We share data only with Stripe (payments) and Amazon Web Services (hosting), and with Google Analytics for usage statistics.
+
+You can request a copy of your personal data or ask us to delete your account and personal information at any time by emailing privacy@example.com. You have the right to access and the right to erasure, and you can withdraw your consent whenever you like.
+
+We retain account data for 24 months after your last login and then delete it. Server logs are kept for 30 days.
+
+All data is encrypted in transit with TLS and encrypted at rest. We use access controls, two-factor authentication for staff, and annual security audits to protect your information.
+
+Our legal basis for processing is your contract with us and our legitimate interests. Contact our data protection officer at privacy@example.com. We will not discriminate against you for exercising your rights, and you may opt out of the sale or sharing of your information.

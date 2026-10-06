@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PolicyScan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F7F7; --surface:#FFFFFF; --surface-2:#EAF1F0; --ink:#13233A; --ink-2:#4A5A6E; --line:#D5DEDD;
+  --accent:#0D8A7E; --accent-ink:#FFFFFF; --good:#15803D; --warn:#B45309; --bad:#C2291F;
+  --good-bg:#E4F3E8; --warn-bg:#FBEFD9; --bad-bg:#FBE4E1;
+  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E1622; --surface:#16212F; --surface-2:#1C2A3A; --ink:#E6EDF3; --ink-2:#9AAABB; --line:#2A3A4C;
+    --accent:#2BB3A3; --accent-ink:#06201D; --good:#4ADE80; --warn:#F5B454; --bad:#F87171;
+    --good-bg:#14301F; --warn-bg:#35270F; --bad-bg:#3A1A18;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E1622; --surface:#16212F; --surface-2:#1C2A3A; --ink:#E6EDF3; --ink-2:#9AAABB; --line:#2A3A4C;
+  --accent:#2BB3A3; --accent-ink:#06201D; --good:#4ADE80; --warn:#F5B454; --bad:#F87171;
+  --good-bg:#14301F; --warn-bg:#35270F; --bad-bg:#3A1A18;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:1040px;margin:0 auto}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.01em}
+.logo{width:32px;height:32px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
+.logo svg{width:18px;height:18px}
+.demo-tag{font-size:12px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+h1{font-size:clamp(24px,4vw,34px);line-height:1.15;letter-spacing:-.02em;margin:8px 0 6px;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:62ch;margin:0 0 20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.tabs{display:flex;gap:4px;background:var(--surface-2);border-radius:8px;padding:4px;width:max-content;max-width:100%;margin-bottom:14px}
+.tabs button{border:0;background:transparent;color:var(--ink-2);font:600 13px var(--sans);padding:7px 14px;border-radius:6px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input[type=text],textarea{flex:1 1 260px;min-width:0;font:15px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:11px 12px}
+textarea{width:100%;min-height:150px;font:13px/1.55 var(--mono);resize:vertical}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;font:700 15px var(--sans);padding:11px 22px;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.6;cursor:progress}
+.samples{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;font-size:13px;color:var(--ink-2)}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;font:500 13px var(--mono);cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.hint{font-size:12.5px;color:var(--ink-2);margin-top:8px}
+
+.steps{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:8px}
+.steps li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-2)}
+.steps .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center}
+.steps li.run .dot{border-color:var(--accent);border-top-color:transparent;animation:spin .8s linear infinite}
+.steps li.done{color:var(--ink)}
+.steps li.done .dot{background:var(--accent);border-color:var(--accent)}
+.steps li.done .dot::after{content:"";width:6px;height:3px;border-left:2px solid var(--accent-ink);border-bottom:2px solid var(--accent-ink);transform:rotate(-45deg) translate(1px,-1px)}
+.steps li.skip{opacity:.55}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.steps li.run .dot{animation:none}}
+
+#report{margin-top:22px;display:grid;gap:16px}
+.summary{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
+@media (max-width:620px){.summary{grid-template-columns:1fr;justify-items:start}}
+.ring{position:relative;width:150px;height:150px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .val{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .num{font-size:44px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.ring .of{font-size:13px;color:var(--ink-2)}
+.site{font:500 14px var(--mono);color:var(--ink-2)}
+.verdict{font-size:26px;font-weight:800;margin:2px 0 6px;letter-spacing:-.01em}
+.pill{display:inline-block;font:700 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px}
+.p-good{background:var(--good-bg);color:var(--good)} .p-warn{background:var(--warn-bg);color:var(--warn)} .p-bad{background:var(--bad-bg);color:var(--bad)}
+.meta{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin-top:8px}
+.meta b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin:0 0 12px;font-weight:700}
+.cat{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.cat:last-child{border-bottom:0}
+.cat .name{font-weight:600;font-size:14px}
+.cat .pts{font:500 13px var(--mono);font-variant-numeric:tabular-nums}
+.bar{grid-column:1/-1;height:7px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:4px;transition:width .6s ease}
+.cat .why{grid-column:1/-1;font-size:12.5px;color:var(--ink-2)}
+
+.flag{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.flag:last-child{border-bottom:0}
+.sev{width:10px;height:10px;border-radius:50%;margin-top:6px}
+.flag .t{font-weight:700;font-size:14px}
+.flag .d{font-size:13.5px;color:var(--ink-2)}
+.flag q{display:block;margin-top:6px;font:12.5px/1.5 var(--mono);color:var(--ink);background:var(--surface-2);padding:7px 10px;border-radius:6px;quotes:"\201C" "\201D"}
+.flag .tag{font:500 11px var(--mono);color:var(--ink-2)}
+
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-weight:600;color:var(--ink-2);font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td.dom{font-family:var(--mono);font-size:12.5px}
+tr:last-child td{border-bottom:0}
+.check{display:flex;gap:10px;align-items:flex-start;padding:7px 0;font-size:14px}
+.check .m{font:700 13px var(--mono);width:18px;flex:none}
+.note{font-size:12.5px;color:var(--ink-2);margin-top:10px}
+footer{margin-top:28px;font-size:12.5px;color:var(--ink-2);max-width:70ch}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></span>PolicyScan</div>
+    <span class="demo-tag">Prototype demo · sample data</span>
+  </header>
+
+  <h1>Does this website do what its privacy policy says?</h1>
+  <p class="lede">PolicyScan reads a privacy policy, checks which trackers the site really loads, and gives it a score out of 10 with the reasons behind every point.</p>
+
+  <section class="panel" aria-label="Scan a website">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-url" aria-selected="true">Scan a website</button>
+      <button role="tab" id="tab-text" aria-selected="false">Paste policy text</button>
+    </div>
+
+    <form id="form-url" class="row" autocomplete="off">
+      <input type="text" id="url" value="somerecipeapp.com" aria-label="Website address" placeholder="example.com">
+      <button class="btn" id="go-url" type="submit">Scan</button>
+    </form>
+    <div class="samples" id="samples-url">Try a sample site:
+      <button class="chip" data-site="somerecipeapp.com">somerecipeapp.com</button>
+      <button class="chip" data-site="fitpulse.app">fitpulse.app</button>
+      <button class="chip" data-site="quietnotes.io">quietnotes.io</button>
+    </div>
+
+    <form id="form-text" hidden>
+      <textarea id="policy" aria-label="Privacy policy text"></textarea>
+      <div class="row" style="margin-top:10px;align-items:center">
+        <button class="btn" id="go-text" type="submit">Analyze text</button>
+        <button class="chip" type="button" id="load-sample">Load sample policy</button>
+      </div>
+      <p class="hint">Text-only scans can't check the live site, so the Policy vs. practice category is skipped and the score is scaled to 10.</p>
+    </form>
+
+    <ol class="steps" id="steps" hidden></ol>
+  </section>
+
+  <div id="report" aria-live="polite"></div>
+
+  <footer>This is a front-end prototype for the capstone proposal. The three sample sites and their scan results are fictional. Pasted text is scored in your browser with simple keyword rules that stand in for the trained NLP model. PolicyScan is informational and not legal advice.</footer>
+</div>
+
+<script>
+const CATS=[
+  {k:"collection",name:"Data collection",max:2},
+  {k:"sharing",name:"Data sharing",max:2},
+  {k:"rights",name:"User rights (access & delete)",max:1.5},
+  {k:"retention",name:"Data retention",max:1},
+  {k:"security",name:"Security & clarity",max:1},
+  {k:"practice",name:"Policy vs. practice",max:2.5},
+];
+const SITES={
+  "somerecipeapp.com":{
+    paragraphs:42,
+    scores:{collection:1,sharing:0.5,rights:0,retention:0.25,security:0.75,practice:1.5},
+    why:{
+      collection:"Collects precise location and browsing history.",
+      sharing:"Shares with unnamed “trusted partners.”",
+      rights:"No way to access or delete your data.",
+      retention:"Kept “as long as necessary” with no time limit.",
+      security:"Mentions encryption, but uses vague wording often.",
+      practice:"6 of 14 trackers are not disclosed."
+    },
+    flags:[
+      {s:"bad",t:"Undisclosed advertising trackers",d:"The policy never mentions advertising partners, but the site sends data to Meta, Google Ads, and TikTok.",tag:"Policy vs. practice"},
+      {s:"warn",t:"Vague sharing language",d:"Partners are never named.",q:"We may share information with trusted partners to improve your experience.",tag:"Data sharing"},
+      {s:"warn",t:"No deletion rights",d:"There is no process to access or delete your data, which CCPA and GDPR require.",tag:"User rights"},
+      {s:"warn",t:"Data kept indefinitely",d:"No retention period is given.",q:"We retain information for as long as necessary for our business purposes.",tag:"Data retention"},
+      {s:"warn",t:"Collects precise location",d:"Location is collected even when you only browse recipes.",q:"We collect your device’s precise location when you use our services.",tag:"Data collection"},
+      {s:"good",t:"Encryption described",d:"Data is encrypted in transit (HTTPS).",tag:"Security"}
+    ],
+    trackers:[
+      ["connect.facebook.net","Meta","Advertising",false],["googleads.g.doubleclick.net","Google","Advertising",false],
+      ["analytics.tiktok.com","TikTok","Advertising",false],["ads.pubmatic.com","PubMatic","Ad exchange",false],
+      ["cdn.krxd.net","Salesforce","Data broker",false],["tags.bluekai.com","Oracle","Data broker",false],
+      ["www.google-analytics.com","Google","Analytics",true],["static.hotjar.com","Hotjar","Session recording",true],
+      ["js.stripe.com","Stripe","Payments",true],["fonts.googleapis.com","Google","Fonts / CDN",true],
+      ["cdn.segment.com","Twilio Segment","Analytics",true],["widget.intercom.io","Intercom","Support chat",true],
+      ["cdn.cookielaw.org","OneTrust","Consent banner",true],["www.youtube.com","Google","Embedded video",true]
+    ],
+    law:[["Right to delete (CCPA / GDPR)",false],["“Do Not Sell or Share” opt-out (CCPA)",false],["Names categories of data collected",true],["Retention period stated",false],["Contact for privacy requests",true]]
+  },
+  "fitpulse.app":{
+    paragraphs:58,
+    scores:{collection:0.5,sharing:1,rights:1.5,retention:0.5,security:1,practice:1.5},
+    why:{
+      collection:"Collects heart rate, sleep data, and contacts.",
+      sharing:"Shares with named insurance partners if you opt in.",
+      rights:"Clear export and delete tools.",
+      retention:"Deleted 3 years after account closure.",
+      security:"Describes encryption and access controls clearly.",
+      practice:"2 of 9 trackers are not disclosed."
+    },
+    flags:[
+      {s:"bad",t:"Collects health-related data",d:"Heart rate and sleep data are highly sensitive if leaked or shared.",q:"We collect heart rate, sleep patterns, and activity data from connected devices.",tag:"Data collection"},
+      {s:"warn",t:"2 undisclosed trackers",d:"An attribution SDK and a data broker script are not mentioned in the policy.",tag:"Policy vs. practice"},
+      {s:"warn",t:"Long retention",d:"Data is kept for 3 years after you close your account.",tag:"Data retention"},
+      {s:"good",t:"Export and delete your data",d:"Settings include one-click export and account deletion.",tag:"User rights"},
+      {s:"good",t:"Partners named, opt-in only",d:"Insurance partners are listed by name and sharing is off by default.",tag:"Data sharing"}
+    ],
+    trackers:[
+      ["app.adjust.com","Adjust","Attribution",false],["cdn.lotame.com","Lotame","Data broker",false],
+      ["api.mixpanel.com","Mixpanel","Analytics",true],["js.stripe.com","Stripe","Payments",true],
+      ["sentry.io","Sentry","Error reporting",true],["www.google-analytics.com","Google","Analytics",true],
+      ["cdn.cookielaw.org","OneTrust","Consent banner",true],["fonts.gstatic.com","Google","Fonts / CDN",true],
+      ["widget.intercom.io","Intercom","Support chat",true]
+    ],
+    law:[["Right to delete (CCPA / GDPR)",true],["“Do Not Sell or Share” opt-out (CCPA)",true],["Names categories of data collected",true],["Retention period stated",true],["Contact for privacy requests",true]]
+  },
+  "quietnotes.io":{
+    paragraphs:19,
+    scores:{collection:2,sharing:2,rights:1.5,retention:1,security:1,practice:2},
+    why:{
+      collection:"Only email and your notes.",
+      sharing:"No selling; processors are listed by name.",
+      rights:"Export and delete at any time.",
+      retention:"Deleted within 30 days of closing your account.",
+      security:"End-to-end encryption, plain wording.",
+      practice:"1 analytics script is not disclosed."
+    },
+    flags:[
+      {s:"warn",t:"1 undisclosed analytics script",d:"A privacy-friendly analytics script loads but isn't listed in the policy.",tag:"Policy vs. practice"},
+      {s:"good",t:"Minimal data collection",d:"Collects only your email address and the notes you write.",q:"We only collect your email address and the content you choose to store.",tag:"Data collection"},
+      {s:"good",t:"Short, clear retention",d:"Everything is deleted within 30 days of closing your account.",tag:"Data retention"},
+      {s:"good",t:"No data selling",d:"The policy states that data is never sold or used for ads.",tag:"Data sharing"}
+    ],
+    trackers:[
+      ["plausible.io","Plausible","Analytics",false],["js.stripe.com","Stripe","Payments",true],["fonts.bunny.net","Bunny","Fonts / CDN",true]
+    ],
+    law:[["Right to delete (CCPA / GDPR)",true],["“Do Not Sell or Share” opt-out (CCPA)",true],["Names categories of data collected",true],["Retention period stated",true],["Contact for privacy requests",true]]
+  }
+};
+
+const SAMPLE_POLICY=`Information We Collect
+We collect your name, email address, and payment details when you create an account. We may also collect your device's precise location and browsing history to personalize content.
+
+How We Share Information
+We may share information with trusted partners and advertisers for marketing purposes. We do not sell your personal information to data brokers.
+
+Your Choices
+You can request access to your data or ask us to delete your account at any time by emailing privacy@example.com.
+
+Data Retention
+We retain information for as long as necessary to provide our services.
+
+Security
+We use industry-standard encryption to protect your data in transit and at rest. From time to time, we may update certain practices.`;
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function rating(score){return score>=8?["Good","p-good","var(--good)"]:score>=5?["Fair","p-warn","var(--warn)"]:["Poor","p-bad","var(--bad)"]}
+function color(frac){return frac>=.75?"var(--good)":frac>=.4?"var(--warn)":"var(--bad)"}
+
+function render(r){
+  const total=r.total;
+  const [label,pill,ringColor]=rating(total);
+  const C=2*Math.PI*62, frac=Math.max(0,Math.min(1,total/10));
+  const catRows=CATS.map(c=>{
+    const v=r.scores[c.k];
+    if(v===null) return `<div class="cat"><span class="name">${c.name}</span><span class="pts">skipped</span><div class="bar"><i style="width:0"></i></div><span class="why">${esc(r.why[c.k])}</span></div>`;
+    const f=v/c.max;
+    return `<div class="cat"><span class="name">${c.name}</span><span class="pts">${fmt(v)} / ${fmt(c.max)}</span><div class="bar"><i style="width:${f*100}%;background:${color(f)}"></i></div><span class="why">${esc(r.why[c.k])}</span></div>`;
+  }).join("");
+  const sevC={bad:"var(--bad)",warn:"var(--warn)",good:"var(--good)"};
+  const order={bad:0,warn:1,good:2};
+  const flags=[...r.flags].sort((a,b)=>order[a.s]-order[b.s]).map(f=>`<div class="flag"><span class="sev" style="background:${sevC[f.s]}"></span><div><div class="t">${esc(f.t)}</div><div class="d">${esc(f.d)}</div>${f.q?`<q>${esc(f.q)}</q>`:""}<div class="tag">${esc(f.tag)}</div></div></div>`).join("") || `<p class="note">No flags found.</p>`;
+
+  let trackerHtml;
+  if(r.trackers){
+    const undis=r.trackers.filter(t=>!t[3]).length;
+    const rows=[...r.trackers].sort((a,b)=>a[3]-b[3]).map(t=>`<tr><td class="dom">${esc(t[0])}</td><td>${esc(t[1])}</td><td>${esc(t[2])}</td><td>${t[3]?'<span class="pill p-good">Disclosed</span>':'<span class="pill p-bad">Not in policy</span>'}</td></tr>`).join("");
+    trackerHtml=`<section class="panel"><h2>Trackers found on the live site · ${r.trackers.length} total, ${undis} not disclosed</h2><div class="tablewrap"><table><thead><tr><th>Domain</th><th>Company</th><th>Type</th><th>In policy?</th></tr></thead><tbody>${rows}</tbody></table></div><p class="note">Recorded in an isolated browser before accepting the cookie banner, then matched against EasyPrivacy and DuckDuckGo Tracker Radar.</p></section>`;
+  } else {
+    trackerHtml=`<section class="panel"><h2>Trackers</h2><p class="note" style="margin:0">Not checked. Scan a website address to audit the live site.</p></section>`;
+  }
+  const law=r.law.map(([t,ok])=>`<div class="check"><span class="m" style="color:${ok?"var(--good)":"var(--bad)"}">${ok?"✓":"✗"}</span><span>${esc(t)}</span></div>`).join("");
+
+  $("#report").innerHTML=`
+  <section class="panel summary">
+    <div class="ring" role="img" aria-label="Score ${fmt(total)} out of 10">
+      <svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="62" fill="none" stroke="var(--surface-2)" stroke-width="13"/><circle id="arc" cx="75" cy="75" r="62" fill="none" stroke="${ringColor}" stroke-width="13" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" style="transition:stroke-dashoffset .9s ease"/></svg>
+      <div class="val"><span class="num">${fmt(total)}</span><span class="of">out of 10</span></div>
+    </div>
+    <div>
+      <div class="site">${esc(r.site)}</div>
+      <div class="verdict">${label} privacy <span class="pill ${pill}" style="vertical-align:middle">${label}</span></div>
+      <div>${esc(r.summary)}</div>
+      <div class="meta"><span><b>${r.paragraphs}</b> paragraphs classified</span><span><b>${r.trackers?r.trackers.length:"–"}</b> trackers found</span><span><b>${r.trackers?r.trackers.filter(t=>!t[3]).length:"–"}</b> undisclosed</span></div>
+    </div>
+  </section>
+  <div class="grid2">
+    <section class="panel"><h2>Score breakdown</h2>${catRows}</section>
+    <section class="panel"><h2>Red flags & good signs</h2>${flags}</section>
+  </div>
+  ${trackerHtml}
+  <section class="panel"><h2>GDPR / CCPA checklist</h2>${law}</section>`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{const a=$("#arc"); if(a) a.style.strokeDashoffset=C*(1-frac);}));
+}
+function fmt(n){return (Math.round(n*100)/100).toString()}
+
+function siteResult(site){
+  const d=SITES[site];
+  const total=Object.values(d.scores).reduce((a,b)=>a+b,0);
+  const bad=d.flags.filter(f=>f.s==="bad").length, warn=d.flags.filter(f=>f.s==="warn").length;
+  return {...d,site,total,summary:`${bad+warn} issues found, including ${d.flags.find(f=>f.s!=="good").t.toLowerCase()}.`};
+}
+
+// Simple keyword rules standing in for the trained NLP classifier
+function analyzeText(text){
+  const paras=text.split(/\n\s*\n|\n(?=[A-Z][^.\n]{0,40}\n)/).map(s=>s.trim()).filter(Boolean);
+  const sentences=text.replace(/\n+/g," ").split(/(?<=[.!?])\s+/).map(s=>s.trim()).filter(s=>s.length>8);
+  const find=re=>sentences.find(s=>re.test(s));
+  const flags=[], scores={}, why={};
+
+  const sensitive=[["precise location",/precise location|geolocation|gps/i],["browsing history",/browsing history|browsing activity/i],["contacts",/contacts|address book/i],["biometric data",/biometric|face|fingerprint/i],["health data",/health|heart rate|medical/i]];
+  const hits=sensitive.filter(([,re])=>re.test(text));
+  scores.collection=Math.max(0,2-hits.length*0.5);
+  why.collection=hits.length?`Collects ${hits.map(h=>h[0]).join(", ")}.`:"No sensitive data types detected.";
+  if(hits.length) flags.push({s:hits.length>1?"bad":"warn",t:`Collects ${hits[0][0]}${hits.length>1?` and ${hits.length-1} more sensitive type${hits.length>2?"s":""}`:""}`,d:"Sensitive data raises the harm if it's shared or breached.",q:find(hits[0][1]),tag:"Data collection"});
+
+  let sh=2; const shareNotes=[];
+  const sells=/\bsell\b|\bsold\b/i.test(text)&&!/(do not|don't|never|will not)\s+sell/i.test(text);
+  if(sells){sh-=1.5;shareNotes.push("sells data");flags.push({s:"bad",t:"May sell your data",d:"The policy allows selling personal information.",q:find(/\bsell\b|\bsold\b/i),tag:"Data sharing"});}
+  if(/advertis/i.test(text)){sh-=0.75;shareNotes.push("shares with advertisers");flags.push({s:"bad",t:"Shares data with advertisers",d:"Your data can be used for targeted ads.",q:find(/advertis/i),tag:"Data sharing"});}
+  if(/trusted partners|third[- ]part(y|ies)|partners/i.test(text)){sh-=0.5;shareNotes.push("vague partners");flags.push({s:"warn",t:"Vague sharing language",d:"Partners are not named.",q:find(/partners|third[- ]part/i),tag:"Data sharing"});}
+  if(/(do not|don't|never|will not)\s+sell/i.test(text)){sh+=0.25;flags.push({s:"good",t:"States it does not sell data",d:"The policy commits to not selling personal information.",q:find(/(do not|don't|never|will not)\s+sell/i),tag:"Data sharing"});}
+  scores.sharing=clamp(sh,0,2); why.sharing=shareNotes.length?cap(shareNotes.join("; "))+".":"No risky sharing detected.";
+
+  const del=/delete|deletion|erase/i.test(text), acc=/access|copy of|export|download your/i.test(text), opt=/opt[- ]out/i.test(text);
+  scores.rights=(del?0.75:0)+(acc?0.5:0)+(opt?0.25:0);
+  why.rights=[del&&"delete",acc&&"access",opt&&"opt out"].filter(Boolean).length?`You can ${[del&&"delete",acc&&"access",opt&&"opt out"].filter(Boolean).join(", ")}.`:"No access or deletion rights found.";
+  if(del) flags.push({s:"good",t:"You can delete your data",d:"The policy explains how to request deletion.",q:find(/delete|deletion|erase/i),tag:"User rights"});
+  else flags.push({s:"warn",t:"No deletion rights",d:"No way to delete your data is described (a CCPA/GDPR gap).",tag:"User rights"});
+
+  const period=/\b\d+\s*(days?|months?|years?)\b/i.test(text)&&/retain|retention|delete|kept|keep/i.test(text);
+  const vagueRet=/as long as (necessary|needed)|indefinitely/i.test(text);
+  scores.retention=period?1:vagueRet?0.25:0;
+  why.retention=period?"Gives a clear time limit.":vagueRet?"Kept “as long as necessary.”":"No retention period stated.";
+  if(!period) flags.push({s:"warn",t:vagueRet?"No clear retention limit":"No retention period",d:"It's unclear when your data is deleted.",q:vagueRet?find(/as long as|indefinitely/i):undefined,tag:"Data retention"});
+
+  const enc=/encrypt|secure|safeguard/i.test(text);
+  const words=text.split(/\s+/).length, hedges=(text.match(/\b(may|might|certain|from time to time|such as|including but not limited)\b/gi)||[]).length;
+  const hedgeRate=hedges/Math.max(words,1)*100;
+  scores.security=clamp((enc?0.6:0)+(hedgeRate<1.5?0.4:hedgeRate<3?0.2:0),0,1);
+  why.security=`${enc?"Describes security measures":"No security measures described"}; ${hedges} vague word${hedges===1?"":"s"} (${hedgeRate.toFixed(1)} per 100 words).`;
+  if(enc) flags.push({s:"good",t:"Security measures described",d:"Mentions encryption or safeguards.",q:find(/encrypt|secure|safeguard/i),tag:"Security"});
+  if(hedgeRate>=1.5) flags.push({s:"warn",t:"Heavy use of vague language",d:`Words like “may” and “certain” appear ${hedges} times.`,tag:"Clarity"});
+
+  scores.practice=null; why.practice="Not checked for pasted text.";
+  const raw=CATS.filter(c=>c.k!=="practice").reduce((a,c)=>a+scores[c.k],0);
+  const total=raw/7.5*10;
+  const issues=flags.filter(f=>f.s!=="good").length;
+  return {site:"Pasted policy text",scores,why,flags,trackers:null,paragraphs:paras.length,total,
+    summary:`${issues} issue${issues===1?"":"s"} found in the text. Scan a website to also check its trackers.`,
+    law:[["Right to delete (CCPA / GDPR)",del],["“Do Not Sell or Share” opt-out (CCPA)",/(do not|don't) sell|opt[- ]out/i.test(text)],["Names categories of data collected",/collect/i.test(text)],["Retention period stated",period],["Contact for privacy requests",/@|contact/i.test(text)]]};
+}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+async function runSteps(list){
+  const el=$("#steps"); el.hidden=false;
+  el.innerHTML=list.map(([t,skip])=>`<li class="${skip?"skip":""}"><span class="dot"></span>${esc(t)}</li>`).join("");
+  const lis=[...el.children];
+  for(let i=0;i<lis.length;i++){
+    if(list[i][1]) continue;
+    lis[i].className="run"; await sleep(reduced?60:420+Math.random()*250); lis[i].className="done";
+  }
+}
+
+let busy=false;
+async function scanSite(site){
+  if(busy) return; busy=true;
+  site=site.trim().toLowerCase().replace(/^https?:\/\//,"").replace(/\/.*$/,"");
+  $("#url").value=site; $("#go-url").disabled=true; $("#report").innerHTML="";
+  await runSteps([["Checking the address is safe to visit",0],["Finding and downloading the privacy policy",0],["Classifying each paragraph with the NLP model",0],["Loading the site in an isolated browser to record trackers",0],["Comparing the policy to what the site does",0],["Calculating the score",0]]);
+  const known=SITES[site];
+  if(known) render(siteResult(site));
+  else $("#report").innerHTML=`<section class="panel"><h2>Sample sites only</h2><p style="margin:0">This prototype can't reach live websites yet, so <b>${esc(site||"that address")}</b> can't be scanned. Pick a sample site above, or paste a real privacy policy in the <b>Paste policy text</b> tab to score it.</p></section>`;
+  $("#go-url").disabled=false; busy=false;
+}
+async function scanText(){
+  if(busy) return;
+  const text=$("#policy").value.trim();
+  if(text.length<40){$("#report").innerHTML=`<section class="panel"><p style="margin:0">Paste at least a few sentences of a privacy policy, or load the sample policy.</p></section>`;return;}
+  busy=true; $("#go-text").disabled=true; $("#report").innerHTML="";
+  await runSteps([["Splitting the policy into paragraphs",0],["Classifying each paragraph with the NLP model",0],["Checking the live site's trackers (skipped for pasted text)",1],["Calculating the score",0]]);
+  render(analyzeText(text));
+  $("#go-text").disabled=false; busy=false;
+}
+
+function setTab(which){
+  const url=which==="url";
+  $("#tab-url").setAttribute("aria-selected",url); $("#tab-text").setAttribute("aria-selected",!url);
+  $("#form-url").hidden=!url; $("#samples-url").hidden=!url; $("#form-text").hidden=url;
+}
+$("#tab-url").onclick=()=>setTab("url");
+$("#tab-text").onclick=()=>{setTab("text"); if(!$("#policy").value) $("#policy").value=SAMPLE_POLICY;};
+$("#form-url").addEventListener("submit",e=>{e.preventDefault();scanSite($("#url").value)});
+$("#form-text").addEventListener("submit",e=>{e.preventDefault();scanText()});
+$("#load-sample").onclick=()=>{$("#policy").value=SAMPLE_POLICY};
+document.querySelectorAll(".chip[data-site]").forEach(b=>b.onclick=()=>scanSite(b.dataset.site));
+
+// Open in a working state with the sample report
+render(siteResult("somerecipeapp.com"));
+</script>
+</body>
+</html>

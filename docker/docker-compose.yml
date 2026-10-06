@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: policyscan
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: policyscan
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [backend]
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    env_file: ../.env
+    environment:
+      POLICYSCAN_DATABASE_URL: postgresql+psycopg://policyscan:${POSTGRES_PASSWORD}@db:5432/policyscan
+      POLICYSCAN_AUDIT_WORKER_URL: http://audit:9000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../models:/srv/models:ro
+    depends_on: [db, audit]
+    networks: [backend, audit]
+
+  # Isolated: own network (shared only with the API), no DB, no .env, no secrets, limited resources.
+  audit:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.audit
+    networks: [audit]
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 256
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    shm_size: 512m  # Chromium needs /dev/shm
+
+volumes:
+  pgdata:
+
+networks:
+  backend:
+  audit:

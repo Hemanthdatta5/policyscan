@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PolicyScan</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></span>PolicyScan</div>
+    <div class="account">
+      <span id="who"></span>
+      <button class="btn small ghost" id="btn-login" type="button">Log in / Sign up</button>
+      <button class="btn small ghost" id="btn-mine" type="button" hidden>My reports</button>
+      <button class="btn small ghost" id="btn-logout" type="button" hidden>Log out</button>
+    </div>
+  </header>
+
+  <h1>Does this website do what its privacy policy says?</h1>
+  <p class="lede">PolicyScan reads a privacy policy, checks which trackers the site really loads, and gives it a score out of 10 with the reasons behind every point.</p>
+
+  <section class="panel" id="auth-panel" hidden aria-label="Log in or sign up">
+    <h2>Account</h2>
+    <form id="auth-form" class="row">
+      <input type="email" id="email" placeholder="Email" autocomplete="username" required aria-label="Email">
+      <input type="password" id="password" placeholder="Password (10+ characters)" autocomplete="current-password" required aria-label="Password">
+      <button class="btn" type="submit" id="do-login">Log in</button>
+      <button class="btn ghost" type="button" id="do-register">Sign up</button>
+    </form>
+    <div class="error" id="auth-error" role="alert"></div>
+  </section>
+
+  <section class="panel" id="mine-panel" hidden aria-label="My saved reports">
+    <h2>My saved reports</h2>
+    <ul class="saved-list" id="saved-list"></ul>
+  </section>
+
+  <section class="panel" aria-label="Scan a website">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-url" aria-selected="true" type="button">Scan a website</button>
+      <button role="tab" id="tab-text" aria-selected="false" type="button">Paste policy text</button>
+    </div>
+    <form id="form-url" class="row" autocomplete="off">
+      <input type="text" id="url" aria-label="Website address" placeholder="example.com" maxlength="2048" required>
+      <button class="btn" type="submit">Scan</button>
+    </form>
+    <form id="form-text" autocomplete="off" hidden>
+      <textarea id="text" aria-label="Privacy policy text" placeholder="Paste a privacy policy here" maxlength="200000"></textarea>
+      <div class="row mt"><button class="btn" type="submit">Analyze text</button></div>
+      <div class="hint">Pasted text skips the tracker check; the score is scaled to 10.</div>
+    </form>
+    <div id="status" role="status"></div>
+    <div class="error" id="scan-error" role="alert"></div>
+  </section>
+
+  <div id="report" hidden></div>
+
+  <footer>PolicyScan output is informational, not legal advice. Only public pages are scanned, and robots.txt is respected.</footer>
+</div>
+</body>
+</html>

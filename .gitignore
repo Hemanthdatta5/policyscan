@@ -1,26 +1,36 @@
+# Python
 .venv/
 __pycache__/
 *.pyc
 *.egg-info/
 .pytest_cache/
 .ruff_cache/
+
+# Secrets and local state (never commit)
 .env
+.env.*
+!.env.example
 *.db
 *.sqlite3
+*.log
 
-# Data and models (large / licensed)
+# Data (large / licensed: OPP-115 must be downloaded separately)
 data/raw/*
 !data/raw/.gitkeep
 data/processed/
+
+# Models: only the small baseline is committed so the app works out of the box
 models/*
 !models/.gitkeep
+!models/baseline-v0/
 
 # Tracker list cache
 .cache/
 
-# Tooling
+# Tooling / editor / OS
 graphify-out/
-.claude/settings.local.json
-
-case_study.log
-.ruff_cache/
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

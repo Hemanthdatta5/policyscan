@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "per_category": {
+      "collection": {
+        "precision": 0.8697674418604651,
+        "recall": 0.8538812785388128,
+        "f1": 0.8617511520737328,
+        "support": 219
+      },
+      "sharing": {
+        "precision": 0.8208955223880597,
+        "recall": 0.8333333333333334,
+        "f1": 0.8270676691729323,
+        "support": 132
+      },
+      "rights": {
+        "precision": 0.7083333333333334,
+        "recall": 0.5666666666666667,
+        "f1": 0.6296296296296297,
+        "support": 90
+      },
+      "retention": {
+        "precision": 0.5789473684210527,
+        "recall": 0.4074074074074074,
+        "f1": 0.4782608695652174,
+        "support": 27
+      },
+      "security": {
+        "precision": 0.9069767441860465,
+        "recall": 0.582089552238806,
+        "f1": 0.7090909090909091,
+        "support": 67
+      },
+      "informational": {
+        "precision": 0.8604651162790697,
+        "recall": 0.7326732673267327,
+        "f1": 0.7914438502673797,
+        "support": 303
+      }
+    },
+    "micro_f1": 0.7853071564281191,
+    "macro_f1": 0.7162073466333001
+  },
+  "thresholds": {
+    "collection": 0.55,
+    "sharing": 0.6,
+    "rights": 0.65,
+    "retention": 0.55,
+    "security": 0.55,
+    "informational": 0.55
+  },
+  "sizes": {
+    "train": 2789,
+    "val": 445,
+    "test": 535,
+    "train_policies": 80,
+    "val_policies": 17,
+    "test_policies": 18
+  }
+}

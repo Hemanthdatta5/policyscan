@@ -26,6 +26,23 @@ uvicorn app.main:app --reload                # http://localhost:8000
 pytest
 ```
 
+### macOS / Linux
+
+Needs Python 3.11+ (`brew install python@3.11` if `python3 --version` is older).
+
+```
+git clone https://github.com/Hemanthdatta5/policyscan.git
+cd policyscan
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev,ml,audit]"
+playwright install chromium
+cp .env.example .env     # then set POLICYSCAN_SECRET_KEY to a random value
+uvicorn app.main:app     # open http://localhost:8000
+```
+
+Generate a key with `python3 -c "import secrets; print(secrets.token_urlsafe(48))"`. Pasting policy text works even without `playwright install chromium`; the browser is only needed for the tracker audit of a live site.
+
 ### Train the classifier (optional but recommended)
 
 ```
